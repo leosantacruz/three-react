@@ -1,0 +1,23 @@
+{
+  "Lights": {
+    "description": "Auto imported from components/Lights.vue"
+  },
+  "Materials": {
+    "description": "Auto imported from components/Materials.vue"
+  },
+  "NuxtLogo": {
+    "description": "Auto imported from components/NuxtLogo.vue"
+  },
+  "Shadows": {
+    "description": "Auto imported from components/Shadows.vue"
+  },
+  "Texts": {
+    "description": "Auto imported from components/Texts.vue"
+  },
+  "Tutorial": {
+    "description": "Auto imported from components/Tutorial.vue"
+  },
+  "Viewer": {
+    "description": "Auto imported from components/Viewer.vue"
+  }
+}
