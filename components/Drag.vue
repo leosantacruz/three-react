@@ -31,6 +31,8 @@ export default {
       textMesh: {},
       scene: {},
       fontType: {},
+      selectedObject: {},
+      objects: [],
     };
   },
   mounted() {
@@ -60,7 +62,7 @@ export default {
     directional_light.shadow.camera.far = 6;
     directional_light.shadow.radius = 10;
     directional_light.position.z = -1.5;
-    this.scene.add(directionalLightHelper);
+    // this.scene.add(directionalLightHelper);
     this.scene.add(directional_light);
     gui.add(directional_light.position, "x").min(-4).max(4).step(0.01);
     gui.add(directional_light.position, "z").min(-4).max(4).step(0.01);
@@ -91,11 +93,6 @@ export default {
     this.scene.add(spotLight);
     this.scene.add(spotLight.target);
 
-    const spotLightCameraHelper = new THREE.CameraHelper(
-      spotLight.shadow.camera
-    );
-    this.scene.add(spotLightCameraHelper);
-
     //Textures
     const textureLoader = new THREE.TextureLoader();
     const texture_matcap = textureLoader.load("img/matcap.jpg");
@@ -121,18 +118,6 @@ export default {
       this.fontType = font;
       this.addText("Hola");
     });
-
-    //Adding random donuts
-    let donutGeometry = new THREE.TorusBufferGeometry(0.2, 0.1, 10, 25);
-    for (let i = 0; i < 100; i++) {
-      const donut = new THREE.Mesh(donutGeometry, this.textMaterial);
-      donut.position.x = Math.random() * (4 + 4) - 4;
-      donut.position.y = Math.random() * (4 + 4) - 4;
-      donut.position.z = Math.random() * (4 + 4) - 4;
-      donut.rotation.x = Math.random() * (4 + 4) - 4;
-      donut.rotation.y = Math.random() * (4 + 4) - 4;
-      this.scene.add(donut);
-    }
 
     // Adding a plane
     let plane = new THREE.Mesh(
@@ -181,27 +166,34 @@ export default {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     document.body.appendChild(renderer.domElement);
-    let miniBoxGeometry = new THREE.BoxBufferGeometry(0.4, 0.4, 0.4);
+    let miniBoxGeometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
     //Change the pivot
-    miniBoxGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.2, 0));
+    miniBoxGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.1, 0));
 
     const miniBox = new THREE.Mesh(
       miniBoxGeometry,
-      new THREE.MeshStandardMaterial({ color: "red" })
+      new THREE.MeshStandardMaterial({ color: "red", wireframe: false })
     );
     miniBox.position.y = 0;
-    miniBox.position.z = 0.4;
+    miniBox.position.z = 0.2;
     miniBox.castShadow = true;
 
     this.scene.add(miniBox);
+    this.objects.push(miniBox);
+    miniBox.cursor = "pointer";
 
     document.onkeypress = (e) => {
       e = e || window.event;
       if (e.keyCode == 99) {
-        let newBox = miniBox.clone();
-        newBox.position.x = 0.4;
+        let newBox = this.selectedObject.clone();
+        newBox.cursor = "pointer";
+
+        newBox.position.x += 0.2;
         this.scene.add(newBox);
+
         moveControls.attach(newBox);
+        this.objects.push(newBox);
+        this.selectedObject = newBox;
       }
     };
 
@@ -210,11 +202,11 @@ export default {
     moveControls.addEventListener("dragging-changed", function (event) {
       orbitControls.enabled = !event.value;
     });
-    moveControls.attach(miniBox);
+
     this.scene.add(moveControls);
     moveControls.mode = "translate";
     moveControls.showY = true;
-    moveControls.translationSnap = 0.4;
+    moveControls.translationSnap = 0.2;
 
     //SECOND WAY TO MOVE AN OBJECT
     // const moveControls = new DragControls(
@@ -226,26 +218,32 @@ export default {
     //   event.object.material.opacity = 0.33;
     //   event.object.position.y = 0.2;
     // });
+    document.addEventListener("click", (event) => {
+      console.log("Clicked");
+      event.preventDefault();
+      var mouse3D = new THREE.Vector3(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1,
+        0.5
+      );
+      var raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse3D, camera);
+      var intersects = raycaster.intersectObjects(this.objects);
+      console.log(intersects);
+      if (intersects.length > 0) {
+        this.selectedObject = intersects[0].object;
+        //Change random color
+        // this.selectedObject.material.color.setHex(Math.random() * 0xffffff);
+        moveControls.attach(this.selectedObject);
+      }
+    });
 
-    //SELECT OBJECT
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-
-    function onPointerMove(event) {
-      // calculate pointer position in normalized device coordinates
-      // (-1 to +1) for both components
-
-      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    }
     const loop = () => {
       renderer.render(this.scene, camera);
-
       orbitControls.update(); //In order to the dumping to be applied
       renderer.render(this.scene, camera);
       window.requestAnimationFrame(loop);
     };
-    window.addEventListener("pointermove", onPointerMove);
     loop();
   },
   methods: {
