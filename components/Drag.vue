@@ -194,10 +194,7 @@ export default {
     miniBox.castShadow = true;
 
     this.scene.add(miniBox);
-    const interaction = new Interaction(renderer, this.scene, camera);
-    miniBox.on("click", () => {
-      console.log("click!");
-    });
+
     document.onkeypress = (e) => {
       e = e || window.event;
       if (e.keyCode == 99) {
