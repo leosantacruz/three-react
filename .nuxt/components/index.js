@@ -1,3 +1,4 @@
+export { default as Drag } from '../../components/Drag.vue'
 export { default as Lights } from '../../components/Lights.vue'
 export { default as Materials } from '../../components/Materials.vue'
 export { default as NuxtLogo } from '../../components/NuxtLogo.vue'

@@ -17,13 +17,16 @@ import dat from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { DragControls } from "three/examples/jsm/controls/DragControls";
+import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
+
 import gsap from "gsap";
 import { gunzip } from "zlib";
 export default {
   name: "Viewer",
   data() {
     return {
-      writeText: "Copado",
+      writeText: "Move it",
       textMaterial: {},
       textMesh: {},
       scene: {},
@@ -163,25 +166,89 @@ export default {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); //set a better pixel ratio depending on the device
     });
 
-    const controls = new OrbitControls(camera, canvas);
-    controls.target.y = 0;
-    controls.update();
-    controls.enableDamping = true; //smooth movment in the camera
+    const orbitControls = new OrbitControls(camera, canvas);
+    orbitControls.target.y = 0;
+    orbitControls.update();
+    orbitControls.enableDamping = true; //smooth movment in the camera
+    //RENDERER
     const renderer = new THREE.WebGLRenderer({
       canvas,
     });
 
-    //RENDER
     renderer.setSize(sizes.width, sizes.height);
+
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    document.body.appendChild(renderer.domElement);
+    let miniBoxGeometry = new THREE.BoxBufferGeometry(0.4, 0.4, 0.4);
+    //Change the pivot
+    miniBoxGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.2, 0));
+
+    const miniBox = new THREE.Mesh(
+      miniBoxGeometry,
+      new THREE.MeshStandardMaterial({ color: "red" })
+    );
+    miniBox.position.y = 0;
+    miniBox.position.z = 0.4;
+    miniBox.castShadow = true;
+
+    this.scene.add(miniBox);
+    const interaction = new Interaction(renderer, this.scene, camera);
+    miniBox.on("click", () => {
+      console.log("click!");
+    });
+    document.onkeypress = (e) => {
+      e = e || window.event;
+      if (e.keyCode == 99) {
+        let newBox = miniBox.clone();
+        newBox.position.x = 0.4;
+        this.scene.add(newBox);
+        moveControls.attach(newBox);
+      }
+    };
+
+    //BEST WAY TO MOVE AN OBJECT
+    const moveControls = new TransformControls(camera, renderer.domElement);
+    moveControls.addEventListener("dragging-changed", function (event) {
+      orbitControls.enabled = !event.value;
+    });
+    moveControls.attach(miniBox);
+    this.scene.add(moveControls);
+    moveControls.mode = "translate";
+    moveControls.showY = true;
+    moveControls.translationSnap = 0.4;
+
+    //SECOND WAY TO MOVE AN OBJECT
+    // const moveControls = new DragControls(
+    //   [sphere],
+    //   camera,
+    //   renderer.domElement
+    // );
+    // moveControls.addEventListener("drag", function (event) {
+    //   event.object.material.opacity = 0.33;
+    //   event.object.position.y = 0.2;
+    // });
+
+    //SELECT OBJECT
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    function onPointerMove(event) {
+      // calculate pointer position in normalized device coordinates
+      // (-1 to +1) for both components
+
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
     const loop = () => {
-      controls.update(); //In order to the dumping to be applied
+      renderer.render(this.scene, camera);
+
+      orbitControls.update(); //In order to the dumping to be applied
       renderer.render(this.scene, camera);
       window.requestAnimationFrame(loop);
     };
-
+    window.addEventListener("pointermove", onPointerMove);
     loop();
   },
   methods: {
