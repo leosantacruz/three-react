@@ -1,5 +1,5 @@
 <template>
-  <Drag />
+  <Loader />
 </template>
 
 <script>

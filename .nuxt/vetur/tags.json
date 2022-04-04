@@ -5,6 +5,9 @@
   "Lights": {
     "description": "Auto imported from components/Lights.vue"
   },
+  "Loader": {
+    "description": "Auto imported from components/Loader.vue"
+  },
   "Materials": {
     "description": "Auto imported from components/Materials.vue"
   },

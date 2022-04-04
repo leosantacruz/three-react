@@ -8,6 +8,7 @@ You can directly use them in pages and other components without the need to impo
 
 - `<Drag>` | `<drag>` (components/Drag.vue)
 - `<Lights>` | `<lights>` (components/Lights.vue)
+- `<Loader>` | `<loader>` (components/Loader.vue)
 - `<Materials>` | `<materials>` (components/Materials.vue)
 - `<NuxtLogo>` | `<nuxt-logo>` (components/NuxtLogo.vue)
 - `<Shadows>` | `<shadows>` (components/Shadows.vue)

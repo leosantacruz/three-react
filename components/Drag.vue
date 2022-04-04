@@ -41,7 +41,7 @@ export default {
     //gui
     const gui = new dat.GUI();
     this.scene = new THREE.Scene();
-
+    this.scene.background = new THREE.Color("white");
     //Basic parameters
 
     const parameters = {
@@ -51,7 +51,7 @@ export default {
     //Lights
     //best performance : ambient and hemisphere lights type
     //Always change the mapsize, far and near values
-    const light_amb = new THREE.AmbientLight("#FFFFFF", 0.01);
+    const light_amb = new THREE.AmbientLight("#FFFFFF", 0.03);
     const directional_light = new THREE.DirectionalLight("#ffffff", 0.1);
     const directionalLightHelper = new THREE.DirectionalLightHelper(
       directional_light
@@ -108,7 +108,7 @@ export default {
     ]);
 
     this.textMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color("#FFFFFF"),
+      color: new THREE.Color("red"),
     });
 
     //FONT
@@ -122,7 +122,7 @@ export default {
     // Adding a plane
     let plane = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(3, 3),
-      this.textMaterial
+      new THREE.ShadowMaterial({ opacity: 0.5 })
     );
     plane.rotation.x = Math.PI * -0.5;
     plane.receiveShadow = true;
