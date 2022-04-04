@@ -77,7 +77,6 @@ export default {
         if (o.isMesh) {
           o.material.roughness = 0.2;
           o.material.metalness = 0.5;
-          o.material.side = THREE.DoubleSide;
           grupito.attach(o);
         }
       });
