@@ -1,12 +1,5 @@
 <template>
   <div>
-    <input
-      class="writeText"
-      type="text"
-      @change="textChange()"
-      v-model="writeText"
-      placeholder="write something here"
-    />
     <canvas></canvas>
   </div>
 </template>
@@ -39,15 +32,16 @@ export default {
   },
   mounted() {
     const canvas = document.querySelector("canvas");
+    let mesh = { rotation: { y: 0 }, position: { z: 0 } };
+
     const axesHelper = new THREE.AxesHelper(1);
+    // this.scene.add(axesHelper);
 
     //gui
     const gui = new dat.GUI();
     this.scene = new THREE.Scene();
 
-    this.scene.add(axesHelper);
-
-    this.scene.background = new THREE.Color("white");
+    this.scene.background = new THREE.Color("#242424");
     //Basic parameters
     this.textMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color("red"),
@@ -57,11 +51,27 @@ export default {
     };
 
     const loader = new GLTFLoader();
-    loader.load("models/toy/scene.gltf", (gltf) => {
-      let mesh = gltf.scene.children[0];
-
+    let boxHelper = {};
+    loader.load("models/tren/proyectotrencito_001.gltf", (gltf) => {
+      mesh = gltf.scene;
       mesh.scale.set(0.1, 0.1, 0.1);
+      mesh.position.y = -0.13;
+      this.scene.add(mesh);
+      boxHelper = new THREE.BoxHelper(mesh, 0xffff00);
 
+      // this.scene.add(boxHelper);
+      mesh.traverse((o) => {
+        if (o.isMesh) {
+          o.castShadow = true;
+          o.material.roughness = 0.2;
+          o.material.metalness = 0.1;
+        }
+      });
+
+      // gui.add(mesh.position, "x").min(-3).max(3);
+      // gui.add(mesh.position, "y").min(-3).max(3).step(0.01);
+
+      return;
       const box1 = new THREE.Box3().setFromObject(mesh);
       const center1 = box1.getCenter(new THREE.Vector3());
 
@@ -119,19 +129,19 @@ export default {
     //Lights
     //best performance : ambient and hemisphere lights type
     //Always change the mapsize, far and near values
-    const light_amb = new THREE.AmbientLight("#FFFFFF", 1);
+    const light_amb = new THREE.AmbientLight("#FFFFFF", 0.5);
 
     const light_point1 = new THREE.PointLight("#FFFFFF", 0.5);
     light_point1.position.x = 3;
-    light_point1.position.y = 4;
+    light_point1.position.y = 10;
     light_point1.position.z = -2;
 
     const light_point2 = new THREE.PointLight("#FFFFFF", 0.5);
     light_point1.position.x = -2;
-    light_point1.position.y = 4;
+    light_point1.position.y = 1;
     light_point1.position.z = 2;
 
-    const directional_light = new THREE.DirectionalLight("#ffffff", 0.1);
+    const directional_light = new THREE.DirectionalLight("#ffffff", 0.4);
 
     directional_light.castShadow = true;
     directional_light.shadow.mapSize.width = 1024;
@@ -139,6 +149,7 @@ export default {
     directional_light.shadow.camera.far = 6;
     directional_light.shadow.radius = 10;
     directional_light.position.z = -1.5;
+    directional_light.position.y = 3;
 
     const spotLight = new THREE.SpotLight("#FFFFFF", 0.4, 10, Math.PI * 0.3);
     spotLight.position.set(2, 2, 2);
@@ -159,6 +170,7 @@ export default {
     //Textures
     const textureLoader = new THREE.TextureLoader();
     const texture_matcap = textureLoader.load("img/matcap.jpg");
+    const texture_grass = textureLoader.load("img/grass.jpeg");
 
     const cubeTextureLoader = new THREE.CubeTextureLoader();
     const enviorementTexture = cubeTextureLoader.load([
@@ -173,7 +185,11 @@ export default {
     // Adding a plane
     let plane = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(3, 3),
-      new THREE.ShadowMaterial({ opacity: 0.5 })
+      //  new THREE.ShadowMaterial({ opacity: 0.5 })
+      new THREE.MeshStandardMaterial({
+        // color: new THREE.Color("#FFF"),
+        map: texture_grass,
+      })
     );
     plane.rotation.x = Math.PI * -0.5;
     plane.receiveShadow = true;
@@ -235,6 +251,26 @@ export default {
 
     document.onkeypress = (e) => {
       e = e || window.event;
+      //FORWARD
+      if (e.keyCode == 119) {
+        // mesh.translateZ(0.2);
+        // gsap.to(mesh.position, { z: mesh.position.z + 0.2, duration: 0.2 });
+      }
+      //BACKWARD
+      if (e.keyCode == 115) {
+        // mesh.translateZ(-0.2);
+        // gsap.to(mesh.position, { z: mesh.position.z - 0.2, duration: 0.2 });
+      }
+      //ROTATE LEFT
+      if (e.keyCode == 97) {
+        gsap.to(mesh.rotation, { y: mesh.rotation.y + 0.5, duration: 0.2 });
+        mesh.updateMatrix();
+        mesh.updateMatrixWorld();
+      }
+      //ROTATE RIGHT
+      if (e.keyCode == 100) {
+        gsap.to(mesh.rotation, { y: mesh.rotation.y - 0.5, duration: 0.2 });
+      }
       if (e.keyCode == 99) {
         let newBox = this.selectedObject.clone();
         newBox.cursor = "pointer";
@@ -291,6 +327,18 @@ export default {
 
     const loop = () => {
       renderer.render(this.scene, camera);
+      if (mesh.translateZ) {
+        mesh.translateZ(0.01);
+        let limit = 1.3;
+        if (
+          mesh.position.z > limit ||
+          mesh.position.z < -limit ||
+          mesh.position.x < -limit ||
+          mesh.position.x > limit
+        ) {
+          mesh.translateZ(-0.01);
+        }
+      }
       orbitControls.update(); //In order to the dumping to be applied
       renderer.render(this.scene, camera);
       window.requestAnimationFrame(loop);
