@@ -1,5 +1,5 @@
 <template>
-  <Drag />
+  <Effects />
 </template>
 
 <script>
