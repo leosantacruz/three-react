@@ -37,11 +37,9 @@ export default {
     const axesHelper = new THREE.AxesHelper(1);
     // this.scene.add(axesHelper);
 
-    //gui
-    const gui = new dat.GUI();
     this.scene = new THREE.Scene();
 
-    this.scene.background = new THREE.Color("#242424");
+    this.scene.background = new THREE.Color("#000000");
     //Basic parameters
     this.textMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color("red"),
@@ -63,7 +61,7 @@ export default {
       mesh.traverse((o) => {
         if (o.isMesh) {
           o.castShadow = true;
-          o.material.roughness = 0.2;
+          o.material.roughness = 0.8;
           o.material.metalness = 0.1;
         }
       });
@@ -132,14 +130,7 @@ export default {
     const light_amb = new THREE.AmbientLight("#FFFFFF", 0.5);
 
     const light_point1 = new THREE.PointLight("#FFFFFF", 0.5);
-    light_point1.position.x = 3;
-    light_point1.position.y = 10;
-    light_point1.position.z = -2;
-
-    const light_point2 = new THREE.PointLight("#FFFFFF", 0.5);
-    light_point1.position.x = -2;
-    light_point1.position.y = 1;
-    light_point1.position.z = 2;
+    light_point1.position.set(0, 1, 0.5);
 
     const directional_light = new THREE.DirectionalLight("#ffffff", 0.4);
 
@@ -151,27 +142,41 @@ export default {
     directional_light.position.z = -1.5;
     directional_light.position.y = 3;
 
-    const spotLight = new THREE.SpotLight("#FFFFFF", 0.4, 10, Math.PI * 0.3);
-    spotLight.position.set(2, 2, 2);
+    const spotLight = new THREE.SpotLight("#FFFFFF", 1, 0, Math.PI * 0.3);
+    spotLight.position.set(-1.2, 1.2, -1.6);
     spotLight.shadow.camera.near = 1;
     spotLight.shadow.camera.far = 6;
     spotLight.shadow.mapSize.width = 1024;
     spotLight.shadow.mapSize.height = 1024;
     spotLight.shadow.camera.fov = 30;
+    spotLight.penumbra = 0.05;
+    spotLight.castShadow = true;
+    // //gui
+    // const gui = new dat.GUI();
+    // gui.add(directional_light.position, "x").min(-5).max(5);
+    // gui.add(directional_light.position, "y").min(-5).max(5);
+    // gui.add(directional_light.position, "z").min(-5).max(5);
 
-    this.scene.add(
-      light_point1,
-      light_point2,
-      light_amb,
-      directional_light,
-      spotLight
-    );
+    this.scene.add(spotLight.target);
+    spotLight.target.position.set(0, -5, 0);
+
+    this.scene.add(light_point1, spotLight);
 
     //Textures
     const textureLoader = new THREE.TextureLoader();
     const texture_matcap = textureLoader.load("img/matcap.jpg");
-    const texture_grass = textureLoader.load("img/grass.jpeg");
+    const texture_floor = textureLoader.load("img/1K-tiling_31_basecolor.jpg");
+    const texture_floor_roughness = textureLoader.load(
+      "img/1K-1K-tiling_31_roughness.jpg"
+    );
+    let repeatWrapping = THREE.RepeatWrapping;
 
+    texture_floor.wrapS = repeatWrapping;
+    texture_floor.wrapT = repeatWrapping;
+    texture_floor.repeat.set(30, 30);
+    texture_floor_roughness.wrapS = repeatWrapping;
+    texture_floor_roughness.wrapT = repeatWrapping;
+    texture_floor_roughness.repeat.set(30, 30);
     const cubeTextureLoader = new THREE.CubeTextureLoader();
     const enviorementTexture = cubeTextureLoader.load([
       "/img/px.jpg",
@@ -184,11 +189,13 @@ export default {
 
     // Adding a plane
     let plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(3, 3),
+      new THREE.PlaneBufferGeometry(30, 30),
       //  new THREE.ShadowMaterial({ opacity: 0.5 })
       new THREE.MeshStandardMaterial({
         // color: new THREE.Color("#FFF"),
-        map: texture_grass,
+        map: texture_floor,
+        roughnessMap: texture_floor_roughness,
+        displacementMap: texture_floor_roughness,
       })
     );
     plane.rotation.x = Math.PI * -0.5;
@@ -199,11 +206,40 @@ export default {
       height: window.innerHeight,
     };
 
+    //Add the text
+    const fontLoader = new FontLoader();
+    fontLoader.load("fonts/helvetica.json", (font) => {
+      const textGeometry = new TextGeometry("Train", {
+        font: font,
+        height: 0.01,
+        size: 0.2,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0,
+        bevelOffset: 0,
+        bevelSegments: 5,
+      });
+      this.textMesh = new THREE.Mesh(
+        textGeometry,
+        new THREE.MeshStandardMaterial()
+      );
+      this.textMesh.castShadow = true;
+      this.scene.add(this.textMesh);
+      this.textMesh.position.x = -1;
+
+      const gui = new dat.GUI();
+      gui.add(this.textMesh.position, "x").min(-5).max(5);
+      gui.add(this.textMesh.position, "y").min(-5).max(5);
+      gui.add(this.textMesh.position, "z").min(-5).max(5);
+    });
+
     //CAMERA
     const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height);
     camera.position.y = 1;
-    camera.position.x = 1;
-    camera.position.z = 2;
+    camera.position.x = -1;
+    camera.position.z = 1;
+
     this.scene.add(camera);
 
     window.addEventListener("resize", () => {
@@ -215,6 +251,7 @@ export default {
       camera.updateProjectionMatrix();
 
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.physicallyCorrectLights = true;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); //set a better pixel ratio depending on the device
     });
 
@@ -324,11 +361,16 @@ export default {
         // moveControls.attach(this.selectedObject);
       }
     });
-
+    let count = 0;
     const loop = () => {
       renderer.render(this.scene, camera);
+      texture_floor.offset.y -= 0.02;
+      if (this.textMesh.position) {
+        count = count + 0.04;
+        this.textMesh.position.y = Math.abs(Math.cos(count)) * 0.3;
+      }
       if (mesh.translateZ) {
-        mesh.translateZ(0.01);
+        // mesh.translateZ(0.01);
         let limit = 1.3;
         if (
           mesh.position.z > limit ||
@@ -336,7 +378,7 @@ export default {
           mesh.position.x < -limit ||
           mesh.position.x > limit
         ) {
-          mesh.translateZ(-0.01);
+          // mesh.translateZ(-0.01);
         }
       }
       orbitControls.update(); //In order to the dumping to be applied
