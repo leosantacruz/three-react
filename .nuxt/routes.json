@@ -1,10 +1,10 @@
 [
   {
-    "name": "trencito",
-    "path": "/trencito",
-    "component": "/Users/leo/Documents/Proyectos/ThreeJS/threesome/pages/trencito.vue",
-    "chunkName": "pages/trencito",
-    "_name": "_134ce1be"
+    "name": "tren",
+    "path": "/tren",
+    "component": "/Users/leo/Documents/Proyectos/ThreeJS/threesome/pages/tren.vue",
+    "chunkName": "pages/tren",
+    "_name": "_f9cebb80"
   },
   {
     "name": "index",

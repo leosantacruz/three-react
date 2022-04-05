@@ -209,7 +209,7 @@ export default {
     //Add the text
     const fontLoader = new FontLoader();
     fontLoader.load("fonts/helvetica.json", (font) => {
-      const textGeometry = new TextGeometry("Train", {
+      const textGeometry = new TextGeometry("el tren", {
         font: font,
         height: 0.01,
         size: 0.2,
@@ -226,12 +226,12 @@ export default {
       );
       this.textMesh.castShadow = true;
       this.scene.add(this.textMesh);
-      this.textMesh.position.x = -1;
+      this.textMesh.position.x = -1.1;
 
-      const gui = new dat.GUI();
-      gui.add(this.textMesh.position, "x").min(-5).max(5);
-      gui.add(this.textMesh.position, "y").min(-5).max(5);
-      gui.add(this.textMesh.position, "z").min(-5).max(5);
+      // const gui = new dat.GUI();
+      // gui.add(this.textMesh.position, "x").min(-5).max(5);
+      // gui.add(this.textMesh.position, "y").min(-5).max(5);
+      // gui.add(this.textMesh.position, "z").min(-5).max(5);
     });
 
     //CAMERA
