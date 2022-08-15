@@ -3,12 +3,14 @@
     "name": "tren",
     "path": "/tren",
     "component": "/Users/leo/Documents/Proyectos/ThreeJS/threesome/pages/tren.vue",
-    "chunkName": "pages/tren"
+    "chunkName": "pages/tren",
+    "_name": "_f9cebb80"
   },
   {
     "name": "index",
     "path": "/",
     "component": "/Users/leo/Documents/Proyectos/ThreeJS/threesome/pages/index.vue",
-    "chunkName": "pages/index"
+    "chunkName": "pages/index",
+    "_name": "_bd9329ee"
   }
 ]

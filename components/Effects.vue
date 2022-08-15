@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div id="page">
+      <UIContent></UIContent>
+    </div>
     <canvas></canvas>
   </div>
 </template>
@@ -34,6 +37,7 @@ export default {
       selectedObject: {},
       objects: [],
       composer: {},
+      cameraAnimations: {},
     };
   },
   mounted() {
@@ -231,7 +235,7 @@ export default {
         new THREE.MeshStandardMaterial()
       );
       this.textMesh.castShadow = true;
-      this.scene.add(this.textMesh);
+      //this.scene.add(this.textMesh);
       this.textMesh.position.x = -1.1;
 
       // const gui = new dat.GUI();
@@ -248,6 +252,20 @@ export default {
 
     this.scene.add(camera);
 
+    // const gui = new dat.GUI();
+    // gui.add(camera.position, "y").min(-5).max(5);
+    // gui.add(camera.position, "x").min(-5).max(5);
+    // gui.add(camera.position, "z").min(-5).max(5);
+    this.cameraAnimations = {
+      top: () => {
+        gsap.to(camera.position, { y: 3.8, duration: 2 });
+      },
+      close: () => {
+        gsap.to(camera.position, { y: 0.5, x: -0.3, z: 0.4, duration: 1 });
+      },
+    };
+    // gui.add(cameraAnimations, "top");
+    // gui.add(cameraAnimations, "close");
     window.addEventListener("resize", () => {
       sizes = {
         width: window.innerWidth,
@@ -271,8 +289,8 @@ export default {
     });
     this.composer = new EffectComposer(renderer);
     this.composer.addPass(new RenderPass(this.scene, camera));
-    this.composer.addPass(new GlitchPass());
-    this.composer.addPass(new ShaderPass(LuminosityShader));
+    // this.composer.addPass(new GlitchPass());
+    // this.composer.addPass(new ShaderPass(LuminosityShader));
     renderer.setSize(sizes.width, sizes.height);
 
     renderer.shadowMap.enabled = true;
@@ -426,7 +444,9 @@ export default {
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Lora&display=swap");
 body {
+  font-family: "Lora", sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -434,5 +454,11 @@ body {
   position: absolute;
   top: 10;
   left: 10px;
+}
+#page {
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  height: 100vh;
 }
 </style>
