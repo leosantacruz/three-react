@@ -27,6 +27,11 @@ import gsap from "gsap";
 import { gunzip } from "zlib";
 export default {
   name: "Viewer",
+  head: {
+    meta: [
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+    ],
+  },
   data() {
     return {
       writeText: "Move it",
@@ -264,6 +269,7 @@ export default {
         gsap.to(camera.position, { y: 0.5, x: -0.3, z: 0.4, duration: 1 });
       },
     };
+    this.cameraAnimations.top();
     // gui.add(cameraAnimations, "top");
     // gui.add(cameraAnimations, "close");
     window.addEventListener("resize", () => {
