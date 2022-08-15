@@ -460,5 +460,6 @@ body {
   width: 100%;
   z-index: 10;
   height: 100vh;
+  box-sizing: border-box;
 }
 </style>

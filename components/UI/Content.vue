@@ -71,7 +71,10 @@ export default {
     rgba(0, 0, 0, 0) 100%
   ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6001123', endColorstr='#00000000',GradientType=1 ); /* IE6-9 */
-
+  -webkit-box-sizing: border-box !important;
+  -moz-box-sizing: border-box !important;
+  -ms-box-sizing: border-box !important;
+  box-sizing: border-box !important;
   width: 100%;
   padding-left: 100px;
   height: 100vh;
@@ -128,5 +131,13 @@ p {
    animations can be calculated correctly. */
 .list-leave-active {
   position: absolute;
+}
+
+@media (max-width: 900px) {
+  #content {
+    display: block;
+    width: 100%;
+    padding: 20px;
+  }
 }
 </style>
